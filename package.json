@@ -1,6 +1,6 @@
 {
   "name": "link-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Model Context Protocol server for accessing links, fetching documentation, and managing Cursor memories",
   "main": "dist/index.js",
   "bin": {
