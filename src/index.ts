@@ -62,27 +62,27 @@ class LinkMCPServer {
           },
           {
             name: "save_cursor_memory",
-            description: "Save conversation summary or important information to Cursor memory files in .cursor directory",
+            description: "Save conversation summary or important information to Cursor memory files. IMPORTANT: The model should first summarize the conversation or information into a well-formatted document before calling this tool. The content should be properly structured with markdown formatting for better readability.",
             inputSchema: {
               type: "object",
               properties: {
                 title: {
                   type: "string",
-                  description: "Title for the memory entry",
+                  description: "Clear, descriptive title for the memory entry (e.g., 'React Hooks 学习总结', 'API 设计讨论摘要')",
                 },
                 content: {
                   type: "string",
-                  description: "Content to save as Cursor memory",
+                  description: "Well-formatted and summarized content in markdown format. Should include: main points, key insights, code examples (if any), decisions made, and actionable items. The model should process and structure the information before saving.",
                 },
                 category: {
                   type: "string",
-                  description: "Category for organization (e.g., 'documentation', 'conversation', 'code-patterns')",
+                  description: "Category for organization: 'conversation' (对话记录), 'documentation' (技术文档), 'code-patterns' (代码模式), 'project-notes' (项目笔记)",
                   default: "conversation"
                 },
                 tags: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Tags for better organization",
+                  description: "Relevant tags for better searchability (e.g., ['react', 'hooks'], ['api', 'design'], ['meeting', 'decisions'])",
                   default: []
                 }
               },
