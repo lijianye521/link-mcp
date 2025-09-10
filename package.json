@@ -8,19 +8,18 @@
   },
   "scripts": {
     "build": "node build.js",
-    "dev": "tsc --watch",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
-    "clean": "rimraf dist",
-    "setup": "npm run build && node setup-cursor.js",
-    "setup-cursor": "node setup-cursor.js",
-    "setup-npx": "npm run build && node setup-cursor.js --npx",
-    "install-global": "npm run build && npm install -g .",
     "prepublishOnly": "npm run build && npm run lint",
-    "publish-check": "npm run build && npm pack --dry-run",
-    "release": "npm run prepublishOnly && npm publish"
+    "publish": "node publish.js"
   },
-  "keywords": ["mcp", "model-context-protocol", "documentation", "cursor", "memory"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "documentation",
+    "cursor",
+    "memory"
+  ],
   "author": "lijianye",
   "license": "MIT",
   "repository": {
