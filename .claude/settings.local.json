@@ -11,7 +11,8 @@
       "Bash(npx link-mcp:*)",
       "Bash(npm login:*)",
       "Bash(npm:*)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,13 +1,18 @@
-#!/usr/bin/env nod
+#!/usr/bin/env node
 
 /**
  * Build script for Link MCP Server
  */
 
-// Use CommonJS syntax for build script (this file won't be part of the ESM package)
-const {execSync} = require('child_process');
-const fs = require('fs');
-const path = require('path');
+// Use ESM syntax for build script
+import {execSync} from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import {fileURLToPath} from 'url';
+import {dirname} from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 console.log('🔨 Building Link MCP Server...');
 
