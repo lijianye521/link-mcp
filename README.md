@@ -31,7 +31,7 @@
   "mcpServers": {
     "link-mcp": {
       "command": "npx",
-      "args": ["link-mcp"]
+      "args": ["link-mcp2"]
     }
   }
 }
@@ -43,12 +43,25 @@
 
 如果你想先通过npm安装包，然后配置到cursor的MCP中，可以按以下步骤操作：
 
-#### 1. 安装包到全局
+#### 1. 配置npm代理源（如果使用内部npm源）
 ```bash
-npm install -g link-mcp
+# 设置npm代理源
+npm config set registry http://10.100.1.27:8688/repository/npmmirror/
+
+# 验证配置
+npm config get registry
 ```
 
-#### 2. 配置 Cursor MCP
+#### 2. 安装包到全局
+```bash
+# 从公共npm源安装
+npm install -g link-mcp
+
+# 或者从内部代理源安装
+npm install -g link-mcp2
+```
+
+#### 3. 配置 Cursor MCP
 在 Cursor 的 MCP 配置中添加以下内容：
 
 **如果使用 Cursor 设置界面：**
@@ -80,7 +93,9 @@ npm install -g link-mcp
 }
 ```
 
-#### 3. 重启 Cursor
+**注意：** 无论安装的是 `link-mcp` 还是 `link-mcp2`，MCP配置中的命令都是 `link-mcp`，因为这是在 package.json 中 `bin` 字段定义的可执行文件名。
+
+#### 4. 重启 Cursor
 配置完成后重启 Cursor 即可使用。
 
 ## 🎮 立即开始
