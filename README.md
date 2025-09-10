@@ -10,11 +10,11 @@
 - **深度爬取** - 支持多层级链接爬取（0-3层可配置）
 - **内容解析** - 提取标题、代码块、API 文档和相关链接
 
-### 🧠 Cursor 记忆管理
-- **自动存储** - 将重要对话和信息自动保存到 `.cursor` 目录
-- **智能分类** - 支持按类别和标签组织记忆内容
-- **快速检索** - 通过分类、标签等维度快速查找历史记忆
-- **Markdown 格式** - 生成格式化的记忆文件，便于 Cursor AI 理解
+### 🧠 AI智能记忆管理
+- **一键保存** - 用户一句话触发，AI自动总结并保存对话
+- **智能分析** - 自动提取关键讨论点、代码示例、技术决策
+- **工作区存储** - 保存到当前项目的 `.cursor` 目录，便于团队共享
+- **结构化输出** - 生成格式化的 Markdown 文件，便于 Cursor AI 理解和引用
 
 ## 📦 安装配置
 
@@ -45,11 +45,10 @@
 配置完成后，**重启 Cursor** 以加载新的 MCP 服务器。
 
 ### 2. 验证工具
-重启后，你将拥有 3 个强大的新工具：
+重启后，你将拥有 2 个强大的新工具：
 
 1. **`fetch_link_documentation`** - 获取网页文档
-2. **`save_cursor_memory`** - 保存对话记忆  
-3. **`get_cursor_memories`** - 检索历史记忆
+2. **`save_cursor_memory`** - AI智能保存对话记忆
 
 ### 3. 首次测试
 ```
@@ -87,50 +86,37 @@ selector: .content
 - 💡 代码示例和使用案例
 - 🔗 相关文档链接
 
-### 🧠 保存记忆 (`save_cursor_memory`)
+### 🧠 智能保存对话记忆 (`save_cursor_memory`)
 
-**参数说明：**
-- `title` (必需) - 记忆标题
-- `content` (必需) - 记忆内容  
-- `category` (可选) - 分类，默认 "conversation"
-- `tags` (可选) - 标签数组
+**核心特点：**
+- **AI自动总结** - 智能分析整个对话历史
+- **无感保存** - 用户只需一句话触发
+- **结构化输出** - 自动格式化为清晰的markdown
+- **工作区存储** - 保存到当前项目的`.cursor`目录
 
-**预定义分类：**
-- `conversation` - 对话记录和讨论
-- `documentation` - 技术文档和API参考  
-- `code-patterns` - 代码模式和最佳实践
-- `project-notes` - 项目决策和重要笔记
-
-**使用示例：**
+**使用方式：**
+用户只需要说：
 ```
-# 保存技术文档
-请使用 save_cursor_memory 保存刚才学到的 React 知识
-参数：
-title: React Hooks 使用总结
-content: React Hooks 提供了函数组件状态管理能力...
-category: documentation  
-tags: ["react", "hooks", "frontend"]
+"保存这次对话"
+"记住刚才讨论的内容"  
+"把这次的技术讨论存起来"
+"保存我们刚才的代码解决方案"
 ```
 
-### 🔍 检索记忆 (`get_cursor_memories`)
+**AI会自动完成：**
+1. 🧠 智能分析整个对话内容
+2. 📋 提取关键讨论点、代码示例、技术决策
+3. 📝 格式化为结构化markdown文档
+4. 💾 保存到 `.cursor/时间戳_主题.md`
+5. ✅ 告知用户保存位置和文件名
 
-**参数说明：**
-- `category` (可选) - 按分类筛选
-- `tag` (可选) - 按标签筛选
-- `limit` (可选) - 返回数量限制，默认 10
+**生成的文件包含：**
+- 对话主题概述
+- 关键技术讨论点
+- 代码示例和解决方案  
+- 重要决策和待办事项
+- 完整的上下文信息
 
-**使用示例：**
-```
-# 查找所有文档
-请使用 get_cursor_memories 查找所有技术文档
-参数：
-category: documentation
-
-# 按标签搜索  
-请使用 get_cursor_memories 查找 React 相关记录
-参数：
-tag: react
-```
 
 ## 🎨 实际应用场景
 
@@ -140,29 +126,32 @@ tag: react
 请使用 fetch_link_documentation 获取 React 官方教程
 URL: https://react.dev/learn
 
-2. 保存学习笔记
-请使用 save_cursor_memory 保存学习内容
-title: React 核心概念总结
-category: documentation
-tags: ["react", "learning"]
-
-3. 后续查阅
-请使用 get_cursor_memories 查看所有 React 学习记录
-tag: react
+2. 学习讨论后保存
+用户："保存我们刚才关于 React Hooks 的讨论"
+AI 自动：分析对话 → 总结要点 → 保存到 .cursor/2025-09-09-react-hooks学习总结.md
 ```
 
-### 🧩 组件库研究
+### 🧩 组件库研究  
 ```
 1. 深度抓取组件文档
 请使用 fetch_link_documentation 获取 Ant Design 按钮组件
 URL: https://ant.design/components/button
 depth: 2
 
-2. 保存组件用法
-请使用 save_cursor_memory 记录最佳实践
-title: Ant Design Button 使用指南
-category: code-patterns
-tags: ["antd", "components", "ui"]
+2. 研究完成后保存
+用户："把这次 Ant Design 的研究结果记录下来"
+AI 自动：整理讨论内容 → 保存组件用法和最佳实践
+```
+
+### 💬 技术讨论记录
+```
+在技术讨论过程中或结束后：
+用户："保存这次对话"或"记住刚才的解决方案"
+AI 自动：
+- 提取问题和解决方案
+- 整理代码示例
+- 记录决策过程  
+- 保存为结构化文档
 ```
 
 ## 🔍 故障排除
@@ -187,12 +176,18 @@ tags: ["antd", "components", "ui"]
 - 尝试不同的网站测试
 - 使用简单的静态网站进行测试
 
-### ❌ 记忆文件无法创建
+### ❌ 对话记忆无法保存
+
+**可能原因：**
+- 当前工作目录没有写权限
+- 磁盘空间不足
+- `.cursor` 目录创建失败
 
 **解决方法：**
-- 检查项目目录写权限
-- 确保磁盘空间充足
-- 手动创建 `.cursor` 目录测试权限
+- 检查当前工作目录的写权限
+- 确保磁盘有足够空间
+- 手动创建 `.cursor` 目录测试
+- 查看是否有防病毒软件阻止文件创建
 
 ## 📄 许可证
 
@@ -204,7 +199,9 @@ MIT License
 
 1. **配置 Cursor**: 添加上面的 MCP 配置
 2. **重启 Cursor**
-3. **测试工具**: 使用 `fetch_link_documentation` 获取第一个网页文档
+3. **测试功能**: 
+   - 使用 `fetch_link_documentation` 获取网页文档
+   - 说"保存这次对话"测试智能记忆功能
 
 **祝你使用愉快！🚀**
 

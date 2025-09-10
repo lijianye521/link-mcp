@@ -7,95 +7,99 @@ const path = require('path');
 console.log('🚀 开始一键发布流程...\n');
 
 try {
-  // 1. 检查当前版本
+  // 1. 读取当前版本
   const packagePath = path.join(__dirname, 'package.json');
   const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
   const currentVersion = packageJson.version;
   
   console.log(`📦 当前版本: ${currentVersion}`);
+  console.log(`📦 包名: ${packageJson.name}`);
   
-  // 2. 构建项目
-  console.log('🔨 构建项目...');
-  execSync('npm run build', { stdio: 'inherit' });
-  console.log('✅ 构建完成\n');
-  
-  // 3. 运行 lint 检查
-  console.log('🔍 运行代码检查...');
-  execSync('npm run lint', { stdio: 'inherit' });
-  console.log('✅ 代码检查通过\n');
-  
-  // 4. 询问版本更新类型
+  // 2. 询问是否要更新版本
   const readline = require('readline');
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
   
-  console.log('请选择版本更新类型:');
-  console.log('1. patch (bug修复) - 1.0.0 → 1.0.1');
-  console.log('2. minor (新功能) - 1.0.0 → 1.1.0');
-  console.log('3. major (重大更改) - 1.0.0 → 2.0.0');
-  console.log('4. 跳过版本更新，使用当前版本发布');
+  console.log('\n请选择操作:');
+  console.log('1. 发布当前版本 (直接发布不改版本号)');
+  console.log('2. patch版本并发布 (1.1.1 → 1.1.2)');
+  console.log('3. minor版本并发布 (1.1.1 → 1.2.0)');
+  console.log('4. major版本并发布 (1.1.1 → 2.0.0)');
   
   rl.question('输入选择 (1-4): ', (answer) => {
     rl.close();
     
-    let versionType = '';
-    switch(answer) {
-      case '1':
-        versionType = 'patch';
-        break;
-      case '2':
-        versionType = 'minor';
-        break;
-      case '3':
-        versionType = 'major';
-        break;
-      case '4':
-        versionType = '';
-        break;
-      default:
-        console.log('❌ 无效选择，使用 patch 更新');
-        versionType = 'patch';
-    }
-    
     try {
-      // 5. 更新版本号
-      if (versionType) {
-        console.log(`📈 更新版本 (${versionType})...`);
-        execSync(`npm version ${versionType}`, { stdio: 'inherit' });
-        
-        // 读取新版本号
-        const updatedPackageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-        const newVersion = updatedPackageJson.version;
-        console.log(`✅ 版本更新: ${currentVersion} → ${newVersion}\n`);
-      } else {
-        console.log('⏩ 跳过版本更新\n');
-      }
+      let newVersion = currentVersion;
       
-      // 6. 发布到 npm
-      console.log('📤 发布到 npm...');
-      execSync('npm publish', { stdio: 'inherit' });
-      
-      // 7. 推送到 git（如果有版本更新）
-      if (versionType) {
-        console.log('📤 推送到 Git...');
-        try {
-          execSync('git push', { stdio: 'inherit' });
-          execSync('git push --tags', { stdio: 'inherit' });
-          console.log('✅ Git 推送完成\n');
-        } catch (error) {
-          console.log('⚠️ Git 推送失败，但 npm 发布成功\n');
+      // 3. 根据选择更新版本
+      if (answer !== '1') {
+        let versionType = '';
+        switch(answer) {
+          case '2':
+            versionType = 'patch';
+            break;
+          case '3':
+            versionType = 'minor';
+            break;
+          case '4':
+            versionType = 'major';
+            break;
+          default:
+            console.log('❌ 无效选择，直接发布当前版本');
         }
+        
+        if (versionType) {
+          console.log(`📈 更新版本 (${versionType})...`);
+          
+          // 手动更新版本号，避免npm version的git操作
+          const versionParts = currentVersion.split('.').map(Number);
+          if (versionType === 'patch') {
+            versionParts[2]++;
+          } else if (versionType === 'minor') {
+            versionParts[1]++;
+            versionParts[2] = 0;
+          } else if (versionType === 'major') {
+            versionParts[0]++;
+            versionParts[1] = 0;
+            versionParts[2] = 0;
+          }
+          
+          newVersion = versionParts.join('.');
+          packageJson.version = newVersion;
+          fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+          
+          console.log(`✅ 版本更新: ${currentVersion} → ${newVersion}\n`);
+        }
+      } else {
+        console.log('⏩ 使用当前版本发布\n');
       }
       
-      console.log('🎉 发布完成！');
+      // 4. 构建项目
+      console.log('🔨 构建项目...');
+      execSync('npm run build', { stdio: 'inherit' });
+      console.log('✅ 构建完成');
+      
+      // 5. 运行代码检查
+      console.log('🔍 运行代码检查...');
+      execSync('npm run lint', { stdio: 'inherit' });
+      console.log('✅ 代码检查通过');
+      
+      // 6. 直接发布到npm（绕过npm publish命令避免循环）
+      console.log('📤 发布到 npm...');
+      execSync('npm publish --access public', { stdio: 'inherit' });
+      
+      // 7. 发布成功
+      console.log('\n🎉 发布完成！');
       console.log(`📦 包名: ${packageJson.name}`);
-      console.log(`🏷️ 版本: ${versionType ? JSON.parse(fs.readFileSync(packagePath, 'utf8')).version : currentVersion}`);
+      console.log(`🏷️ 版本: ${newVersion}`);
       console.log(`🌐 NPM: https://www.npmjs.com/package/${packageJson.name}`);
       
-      console.log('\n用户现在可以通过以下方式使用:');
+      console.log('\n💡 用户现在可以通过以下方式使用:');
       console.log(`npx ${packageJson.name}`);
+      console.log(`npm install -g ${packageJson.name}`);
       
     } catch (error) {
       console.error('❌ 发布失败:', error.message);

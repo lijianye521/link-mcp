@@ -12,16 +12,7 @@ interface CursorMemory {
 }
 
 interface SaveMemoryArgs {
-  title: string;
-  content: string;
-  category?: string;
-  tags?: string[];
-}
-
-interface GetMemoriesArgs {
-  category?: string;
-  tag?: string;
-  limit?: number;
+  summary: string;
 }
 
 export class CursorMemoryTool {
@@ -29,7 +20,7 @@ export class CursorMemoryTool {
   private memoriesFile: string;
 
   constructor() {
-    // 在项目根目录下创建.cursor目录
+    // 在当前工作目录下创建.cursor目录
     this.cursorDir = path.join(process.cwd(), '.cursor');
     this.memoriesFile = path.join(this.cursorDir, 'memories.json');
     this.ensureCursorDirectory();
@@ -39,24 +30,33 @@ export class CursorMemoryTool {
     try {
       const memories = await this.loadMemories();
       
-      // 生成友好的文件名（基于标题和时间戳）
+      // 从AI总结中提取标题（取第一行或前50个字符作为标题）
+      const summaryLines = args.summary.split('\n').filter(line => line.trim());
+      const firstLine = summaryLines[0] || '';
+      const autoTitle = firstLine
+        .replace(/^#+\s*/, '')  // 移除markdown标题标记
+        .replace(/\*\*|\*|__|_/g, '')  // 移除markdown格式标记
+        .substring(0, 50)
+        .trim() || `对话记录-${new Date().toLocaleDateString()}`;
+      
+      // 生成友好的文件名
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
-      const safeTitle = args.title
+      const safeTitle = autoTitle
         .toLowerCase()
         .replace(/[^a-z0-9\u4e00-\u9fa5]/g, '-')  // 支持中文
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
-        .substring(0, 50);
+        .substring(0, 30);
       
       const filename = `${timestamp}_${safeTitle}.md`;
       const memoryId = this.generateId();
       
       const newMemory: CursorMemory = {
         id: memoryId,
-        title: args.title,
-        content: args.content,
-        category: args.category || 'conversation',
-        tags: args.tags || [],
+        title: autoTitle,
+        content: args.summary,
+        category: 'conversation',
+        tags: ['ai-generated', 'conversation'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -64,16 +64,16 @@ export class CursorMemoryTool {
       memories.push(newMemory);
       await this.saveMemories(memories);
 
-      // 创建具有友好文件名的记忆文件
-      await this.createMemoryFileWithName(newMemory, filename);
+      // 直接保存为markdown文件，不依赖旧方法
+      await this.saveToWorkspace(filename, newMemory);
 
-      // 返回详细的保存信息，包括确切的文件名
-      const filePath = `.cursor/memories/${filename}`;
+      // 返回成功信息
+      const filePath = `.cursor/${filename}`;
       return {
         content: [
           {
             type: "text",
-            text: `✅ **记忆保存成功！**\n\n📁 **保存位置：** \`${filePath}\`\n📝 **标题：** ${newMemory.title}\n🏷️ **分类：** ${newMemory.category}\n🏷 **标签：** ${newMemory.tags.length > 0 ? newMemory.tags.join(', ') : '无'}\n🆔 **记忆ID：** ${newMemory.id}\n⏰ **创建时间：** ${new Date(newMemory.createdAt).toLocaleString()}\n\n🎯 **说明：** 这个记忆已经被保存到你的 Cursor 工作区的 \`.cursor\` 目录中，Cursor AI 可以访问并利用这些信息提供更好的上下文支持。\n\n📄 **文件内容已格式化为 Markdown 格式**，便于阅读和AI理解。`,
+            text: `✅ **对话记忆已保存**\n\n📁 **文件位置：** \`${filePath}\`\n📝 **自动标题：** ${newMemory.title}\n⏰ **保存时间：** ${new Date().toLocaleString()}\n\n💡 **提示：** 这个对话总结已经保存到当前工作区的 .cursor 目录中，可以被 Cursor AI 访问和引用。`,
           },
         ],
       };
@@ -82,78 +82,54 @@ export class CursorMemoryTool {
     }
   }
 
-  async getMemories(args: GetMemoriesArgs) {
-    try {
-      const memories = await this.loadMemories();
-      let filteredMemories = memories;
+  private async saveToWorkspace(filename: string, memory: CursorMemory): Promise<void> {
+    const filepath = path.join(this.cursorDir, filename);
+    
+    const content = `# ${memory.title}
 
-      // 按类别过滤
-      if (args.category) {
-        filteredMemories = filteredMemories.filter(m => 
-          m.category.toLowerCase().includes(args.category!.toLowerCase())
-        );
-      }
+**创建时间：** ${new Date(memory.createdAt).toLocaleString()}
+**记忆ID：** ${memory.id}
 
-      // 按标签过滤
-      if (args.tag) {
-        filteredMemories = filteredMemories.filter(m => 
-          m.tags.some(tag => tag.toLowerCase().includes(args.tag!.toLowerCase()))
-        );
-      }
+---
 
-      // 按时间排序（最新的在前）
-      filteredMemories.sort((a, b) => 
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
+${memory.content}
 
-      // 限制数量
-      const limit = args.limit || 10;
-      filteredMemories = filteredMemories.slice(0, limit);
+---
 
-      const output = this.formatMemoriesOutput(filteredMemories);
+*此文件由 Link MCP 自动生成，保存在工作区 .cursor 目录中供 Cursor AI 访问*
+`;
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: output,
-          },
-        ],
-      };
-    } catch (error) {
-      throw new Error(`Failed to get memories: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    await fs.writeFile(filepath, content);
   }
 
   private async ensureCursorDirectory(): Promise<void> {
     await fs.ensureDir(this.cursorDir);
-    await fs.ensureDir(path.join(this.cursorDir, 'memories'));
     
     // 创建.cursor/README.md说明文件
     const readmePath = path.join(this.cursorDir, 'README.md');
     if (!await fs.pathExists(readmePath)) {
-      const readmeContent = `# Cursor Memories
+      const readmeContent = `# Cursor 工作区记忆
 
-This directory contains memories saved by the Link MCP server.
+此目录包含由 Link MCP 保存的对话记忆文件。
 
-## Structure
+## 文件说明
 
-- \`memories.json\` - Index of all memories
-- \`memories/\` - Individual memory files in Markdown format
-- \`conversations/\` - Conversation summaries
+- \`memories.json\` - 记忆索引文件
+- \`*.md\` - 对话记忆的 Markdown 文件
 
-## Usage
+## 使用说明
 
-These files are designed to be read by Cursor's AI to provide context and memory across sessions.
+这些文件被设计为可供 Cursor AI 读取，用于在会话中提供上下文记忆。
 
-## Categories
+## 工作流程
 
-- **conversation** - Conversation summaries and important discussions
-- **documentation** - Documentation and API references
-- **code-patterns** - Code patterns and solutions
-- **project-notes** - Project-specific notes and decisions
+1. 用户说："保存这次对话"或"记住刚才的内容"
+2. AI 自动总结对话的核心内容和关键点  
+3. 总结被保存为格式化的 Markdown 文件
+4. Cursor AI 可以在后续会话中访问这些记忆
 
-Generated by Link MCP Server
+---
+*由 Link MCP 自动生成和管理*
 `;
       await fs.writeFile(readmePath, readmeContent);
     }
@@ -176,92 +152,7 @@ Generated by Link MCP Server
     await fs.writeFile(this.memoriesFile, JSON.stringify(memories, null, 2));
   }
 
-  private async createMemoryFileWithName(memory: CursorMemory, filename: string): Promise<void> {
-    const memoriesDir = path.join(this.cursorDir, 'memories');
-    const filepath = path.join(memoriesDir, filename);
-
-    const content = `# ${memory.title}
-
-**分类：** ${memory.category}
-**标签：** ${memory.tags.length > 0 ? memory.tags.join(', ') : '无标签'}
-**创建时间：** ${new Date(memory.createdAt).toLocaleString()}
-**更新时间：** ${new Date(memory.updatedAt).toLocaleString()}
-**记忆ID：** ${memory.id}
-
----
-
-## 📝 记忆内容
-
-${memory.content}
-
----
-
-## 📋 元数据
-
-- **文件名：** ${filename}
-- **文件路径：** .cursor/memories/${filename}
-- **生成器：** Link MCP Server
-- **用途：** 为 Cursor AI 提供上下文记忆
-
-> 💡 **提示：** 这个文件被设计为可被 Cursor AI 读取和理解的格式，包含了完整的上下文信息和元数据。
-`;
-
-    await fs.writeFile(filepath, content);
-  }
-
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  private formatMemoriesOutput(memories: CursorMemory[]): string {
-    if (memories.length === 0) {
-      return "No memories found matching your criteria.";
-    }
-
-    let output = `# Cursor Memories (${memories.length} found)\n\n`;
-
-    memories.forEach((memory, index) => {
-      output += `## ${index + 1}. ${memory.title}\n\n`;
-      output += `**Category:** ${memory.category}\n`;
-      output += `**Tags:** ${memory.tags.join(', ')}\n`;
-      output += `**Created:** ${new Date(memory.createdAt).toLocaleString()}\n`;
-      output += `**File:** .cursor/memories/${memory.id}.md\n\n`;
-      
-      // 显示内容预览（前200字符）
-      const preview = memory.content.length > 200 
-        ? memory.content.substring(0, 200) + '...'
-        : memory.content;
-      output += `**Preview:** ${preview}\n\n`;
-      output += `---\n\n`;
-    });
-
-    return output;
-  }
-
-  // 辅助方法：自动总结对话并保存
-  async saveConversationSummary(conversation: string, topic?: string): Promise<void> {
-    const title = topic || `Conversation Summary - ${new Date().toLocaleDateString()}`;
-    
-    // 简单的对话总结逻辑
-    const summary = this.summarizeConversation(conversation);
-    
-    await this.saveMemory({
-      title,
-      content: `## Original Conversation\n\n${conversation}\n\n## Summary\n\n${summary}`,
-      category: 'conversation',
-      tags: ['auto-generated', 'conversation-summary']
-    });
-  }
-
-  private summarizeConversation(conversation: string): string {
-    // 简单的总结逻辑 - 在实际应用中可以集成AI总结
-    const lines = conversation.split('\n');
-    const importantLines = lines.filter(line => 
-      line.includes('user:') || 
-      line.includes('assistant:') || 
-      line.length > 50
-    );
-
-    return `This conversation contained ${lines.length} lines of discussion. Found ${importantLines.length} important exchanges. Key topics and actions were discussed.`;
   }
 }

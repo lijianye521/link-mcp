@@ -62,53 +62,16 @@ class LinkMCPServer {
           },
           {
             name: "save_cursor_memory",
-            description: "Save conversation summary or important information to Cursor memory files. IMPORTANT: The model should first summarize the conversation or information into a well-formatted document before calling this tool. The content should be properly structured with markdown formatting for better readability.",
+            description: "当用户要求保存对话或重要信息时使用此工具。AI应该自动：1) 智能总结整个对话的核心内容、关键讨论点、代码示例和重要决策；2) 将总结格式化为结构化的markdown文档；3) 保存到当前工作区的.cursor目录。用户体验：用户只需说'保存这次对话'或'记住刚才讨论的内容'，AI就会自动完成分析、总结和保存全过程。",
             inputSchema: {
               type: "object",
               properties: {
-                title: {
+                summary: {
                   type: "string",
-                  description: "Clear, descriptive title for the memory entry (e.g., 'React Hooks 学习总结', 'API 设计讨论摘要')",
-                },
-                content: {
-                  type: "string",
-                  description: "Well-formatted and summarized content in markdown format. Should include: main points, key insights, code examples (if any), decisions made, and actionable items. The model should process and structure the information before saving.",
-                },
-                category: {
-                  type: "string",
-                  description: "Category for organization: 'conversation' (对话记录), 'documentation' (技术文档), 'code-patterns' (代码模式), 'project-notes' (项目笔记)",
-                  default: "conversation"
-                },
-                tags: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Relevant tags for better searchability (e.g., ['react', 'hooks'], ['api', 'design'], ['meeting', 'decisions'])",
-                  default: []
+                  description: "AI总结的完整对话内容，必须包含：对话主题概述、关键技术点、代码示例、解决方案、重要决策、待办事项等，使用清晰的markdown格式结构化展示"
                 }
               },
-              required: ["title", "content"],
-            },
-          },
-          {
-            name: "get_cursor_memories",
-            description: "Retrieve saved Cursor memories by category or tag",
-            inputSchema: {
-              type: "object",
-              properties: {
-                category: {
-                  type: "string",
-                  description: "Filter by category",
-                },
-                tag: {
-                  type: "string",
-                  description: "Filter by tag",
-                },
-                limit: {
-                  type: "number",
-                  description: "Maximum number of memories to return",
-                  default: 10
-                }
-              },
+              required: ["summary"],
             },
           },
         ],
@@ -125,9 +88,6 @@ class LinkMCPServer {
 
           case "save_cursor_memory":
             return await this.memoryTool.saveMemory(args as any);
-
-          case "get_cursor_memories":
-            return await this.memoryTool.getMemories(args as any);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
