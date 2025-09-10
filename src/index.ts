@@ -62,7 +62,7 @@ class LinkMCPServer {
           },
           {
             name: "save_cursor_memory",
-            description: "当用户要求保存对话或重要信息时使用此工具。AI应该自动：1) 智能总结整个对话的核心内容、关键讨论点、代码示例和重要决策；2) 将总结格式化为结构化的markdown文档；3) 保存到当前工作区的.cursor目录。用户体验：用户只需说'保存这次对话'或'记住刚才讨论的内容'，AI就会自动完成分析、总结和保存全过程。",
+            description: "🚨 MANDATORY TRIGGER: 当用户使用以下任何表达时，AI必须立即调用此工具：'保存'、'记住'、'记录'、'存档'、'保存对话'、'记住内容'、'save'、'remember'等。用户说这些词时，AI应该：1）立即回应'好的，我来总结并保存这次对话'；2）智能分析整个对话历史；3）提取技术要点、代码示例、解决方案；4）格式化为markdown；5）调用此工具保存到.cursor目录。这是用户的明确指令，必须执行。",
             inputSchema: {
               type: "object",
               properties: {
