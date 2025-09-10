@@ -18,7 +18,7 @@
 
 ## 📦 安装配置
 
-### 🌟 NPM 安装（推荐）
+### 方法一：🌟 NPX 直接使用（推荐）
 
 在 Cursor 中配置 MCP，将以下配置添加到 Cursor 的设置中：
 
@@ -38,6 +38,50 @@
 ```
 
 **就这么简单！** 配置完成后重启 Cursor 即可使用。
+
+### 方法二：📦 NPM 安装后配置
+
+如果你想先通过npm安装包，然后配置到cursor的MCP中，可以按以下步骤操作：
+
+#### 1. 安装包到全局
+```bash
+npm install -g link-mcp
+```
+
+#### 2. 配置 Cursor MCP
+在 Cursor 的 MCP 配置中添加以下内容：
+
+**如果使用 Cursor 设置界面：**
+1. 打开 Cursor，按 `Ctrl/Cmd + ,` 进入设置
+2. 搜索 "MCP" 或找到 "Model Context Protocol" 部分
+3. 添加以下配置：
+
+```json
+{
+  "mcpServers": {
+    "link-mcp": {
+      "command": "link-mcp"
+    }
+  }
+}
+```
+
+**如果使用 mcp.json 配置文件：**
+
+在项目根目录或 Cursor 配置目录创建 `mcp.json` 文件：
+
+```json
+{
+  "mcpServers": {
+    "link-mcp": {
+      "command": "link-mcp"
+    }
+  }
+}
+```
+
+#### 3. 重启 Cursor
+配置完成后重启 Cursor 即可使用。
 
 ## 🎮 立即开始
 
