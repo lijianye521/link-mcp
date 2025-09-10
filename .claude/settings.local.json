@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npm run setup:*)",
+      "Read(//c/Users/lijianye/**)",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(npm run:*)",
+      "Bash(npx link-mcp:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

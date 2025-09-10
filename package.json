@@ -1,0 +1,59 @@
+{
+  "name": "link-mcp",
+  "version": "1.0.0",
+  "description": "A Model Context Protocol server for accessing links, fetching documentation, and managing Cursor memories",
+  "main": "dist/index.js",
+  "bin": {
+    "link-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "clean": "rimraf dist",
+    "setup": "npm run build && node setup-cursor.js",
+    "setup-cursor": "node setup-cursor.js",
+    "setup-npx": "npm run build && node setup-cursor.js --npx",
+    "install-global": "npm run build && npm install -g .",
+    "prepublishOnly": "npm run build && npm run lint",
+    "publish-check": "npm run build && npm pack --dry-run",
+    "release": "npm run prepublishOnly && npm publish"
+  },
+  "keywords": ["mcp", "model-context-protocol", "documentation", "cursor", "memory"],
+  "author": "lijianye",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lijianye/link-mcp.git"
+  },
+  "homepage": "https://github.com/lijianye/link-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/lijianye/link-mcp/issues"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.2.0",
+    "path": "^0.12.7",
+    "url": "^0.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/fs-extra": "^11.0.4",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.3"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

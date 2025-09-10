@@ -1,0 +1,31 @@
+# 源码文件（只发布编译后的文件）
+src/
+*.ts
+tsconfig.json
+.eslintrc.js
+
+# 开发文件
+node_modules/
+.git/
+.gitignore
+build.js
+setup-cursor.js
+
+# 临时文件
+*.log
+.DS_Store
+Thumbs.db
+
+# 测试文件
+test/
+tests/
+*.test.js
+*.test.ts
+
+# IDE 配置
+.vscode/
+.idea/
+.claude/
+
+# 用户生成的记忆文件
+.cursor/
